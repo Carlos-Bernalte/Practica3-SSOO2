@@ -14,12 +14,15 @@
 
 #include <iostream>
 #include <condition_variable>
+#include "Request.cpp"
 #include "QueueProtected.cpp"
+
+
 class PaySystem
 {
 private:
     std::condition_variable cv_queue;
-    QueueProtected q_clients;
+    QueueProtected q_request;
 
 public:
     PaySystem();
@@ -33,10 +36,12 @@ void PaySystem::operator () (){
 PaySystem::PaySystem()
 {
 }
+
 void PaySystem::rechargeBalance()
 {
-    while (1)
-    {
-
+    if(!q_request.checkEmpty()){
+        Request r = q_request.remove();
+        r.setCredit(100);
+        q_request.add(r);
     }
 }

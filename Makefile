@@ -7,7 +7,7 @@ CFLAGS := -c -Wall -ansi
 LDLIBS := -I$(DIRHEA) -pthread -std=c++11
 CC := g++
 
-all : dirs ssooiigle 
+all : dirs ssooiigle
 
 dirs:
 	mkdir -p $(DIROBJ) $(DIREXE)
