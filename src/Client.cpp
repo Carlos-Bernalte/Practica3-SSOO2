@@ -13,6 +13,7 @@
 |*********************************************/
 
 #include <iostream>
+//#include <colours.h>
 
 class Client
 {
@@ -29,19 +30,24 @@ class Client
         bool isPremium();
         void payCredit();
         void restoreCredits();
+        void operator () ();
 };
+void Client::operator () (){
+        
+    }
 
 Client::Client(int id)
 {   
     this->id=id;
-    this->balance=100;
     this->premium = false;
+    toString();
 }
 Client::Client(int id, float balance)
 {   
     this->id=id;
-    this->balance=balance;
+    this->balance = balance;
     this->premium = true;
+    toString();
 }
 int Client::getId(){
     return this->id;

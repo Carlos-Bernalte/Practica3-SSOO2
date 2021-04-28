@@ -27,7 +27,11 @@ private:
 public:
     PaySystem();
     void rechargeBalance();
+    void operator () ();
 };
+void PaySystem::operator () (){
+        
+    }
 
 PaySystem::PaySystem()
 {

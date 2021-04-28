@@ -16,7 +16,13 @@ ssooiigle: $(DIROBJ)ssooiigle.o
 	$(CC) -o $(DIREXE)$@ $^ $(LDLIBS)
 
 
-palabra: $(DIROBJ)palabra.o 
+wordsearched: $(DIROBJ)WordSearched.o 
+	$(CC) -o $(DIREXE)$@ $^ $(LDLIBS)
+
+queueprotected: $(DIROBJ)QueueProtected.o 
+	$(CC) -o $(DIREXE)$@ $^ $(LDLIBS)
+
+client: $(DIROBJ)Client.o 
 	$(CC) -o $(DIREXE)$@ $^ $(LDLIBS)
 
 $(DIROBJ)%.o: $(DIRSRC)%.cpp

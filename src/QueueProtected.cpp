@@ -14,9 +14,15 @@ public:
     bool checkEmpty();
 };
 
-QueueProtected::QueueProtected()
-{
-}
+// QueueProtected::QueueProtected()
+// {
+// }
+
+// void QueueProtected::add(Client c){
+//     access.lock();
+//     queue.push(c);
+//     access.unlock();
+// }
 
 bool QueueProtected::checkEmpty(){
     return this->queue.empty();
