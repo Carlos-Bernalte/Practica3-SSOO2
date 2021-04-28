@@ -7,13 +7,14 @@ CFLAGS := -c -Wall -ansi
 LDLIBS := -I$(DIRHEA) -pthread -std=c++11
 CC := g++
 
-all : dirs ssooiigle 
+all : dirs ssooiigle palabra
 
 dirs:
 	mkdir -p $(DIROBJ) $(DIREXE)
 
 ssooiigle: $(DIROBJ)ssooiigle.o 
 	$(CC) -o $(DIREXE)$@ $^ $(LDLIBS)
+
 
 palabra: $(DIROBJ)palabra.o 
 	$(CC) -o $(DIREXE)$@ $^ $(LDLIBS)

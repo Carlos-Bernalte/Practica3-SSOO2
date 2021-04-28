@@ -28,8 +28,9 @@
 #include <colours.h>
 #include "WordSearched.cpp"
 
-void arguments_control(char *argv[],std::string &file, std::string &objective, int &nThreads);
+void arguments_control(int argc, char *argv[],std::string &file, std::string &objective, int &nThreads);
 int number_of_lines(std::string file);
+void create_threads(int nThreads, std::string file, std::string objective);
 void find_word(int thread,std::vector<std::string> assignedLines, int begin, int end, std::string objective);
 std::map<int, std::vector<std::string>> shareLines(std::string file, int nLines, int nThreads);
 std::vector<std::string> splitLine(std::string line);
@@ -44,42 +45,34 @@ std::map<int,std::vector<WordSearched>> vWords;
 int main(int argc, char *argv[]){
     std::string file;
     std::string objective;
-    std::map<int, std::vector<std::string>> assignedLines;
     int nThreads;
-    int nLines;
-    int sizeForThreads;
-    int begin, end;
-    if(argc!=4){
-        std::cerr <<ERROR("[ERROR]-- ")<<WARNING(UNDERLINE("Number of arguments is incorrect") ) <<std::endl;
-        exit(EXIT_FAILURE);
-    } 
-    arguments_control(argv,file,objective,nThreads);
+    arguments_control(argc,argv,file,objective,nThreads);
 
-    nLines=number_of_lines(file);
-
-    if(nLines<nThreads){
-        std::cerr << ERROR("[ERROR]-- ")<<WARNING(UNDERLINE("More threads than lines") )  <<std::endl;
-        exit(EXIT_FAILURE);
-    }
-    sizeForThreads = nLines/nThreads;
-    assignedLines=shareLines(file,nLines,nThreads);
-    for (int i = 0; i < nThreads; i++) {
-        begin=i*sizeForThreads+1;
-        end=begin+sizeForThreads-1;
-
-        if(nLines%nThreads!= 0 && i==nThreads-1){ //Aquí se realiza un ajuste para el ultimo hilo en el caso que no sea exacta la división de total de lineas entre el número de hilos.
-            end++;
-        }
-        vThreads.push_back(std::thread(find_word, i, assignedLines[i], begin, end, objective));
-    }
-
-    std::for_each(vThreads.begin(), vThreads.end(), std::mem_fn(&std::thread::join));
+    create_threads( nThreads, file, objective);
+    
     printResult();
 
     return EXIT_SUCCESS;
 }
+int antiguoMain(int argc, char *argv[]){
+    std::string file;
+    std::string objective;
+    int nThreads;
+    arguments_control(argc,argv,file,objective,nThreads);
+
+    create_threads( nThreads, file, objective);
+    
+    printResult();
+
+    return EXIT_SUCCESS;
+}
+
 /* Controlar los argumentos que pasamos a la hora de ejecutarlo*/
-void arguments_control( char *argv[],std::string &file, std::string &objective, int &nThreads){
+void arguments_control(int argc, char *argv[],std::string &file, std::string &objective, int &nThreads){
+    if(argc!=4){
+        std::cerr <<ERROR("[ERROR]-- ")<<WARNING(UNDERLINE("Number of arguments is incorrect") ) <<std::endl;
+        exit(EXIT_FAILURE);
+    } 
     std::string archivo =LIBROS + std::string(argv[1]);
     std::ifstream File(archivo);
     if(File.good()){
@@ -111,7 +104,31 @@ int number_of_lines(std::string file){
     } 
     return numLines;
 }
+void create_threads(int nThreads, std::string file, std::string objective){
+    int nLines;
+    int sizeForThreads;
+    std::map<int, std::vector<std::string>> assignedLines;
+    int begin, end;
 
+    nLines=number_of_lines(file);
+    if(nLines<nThreads){
+        std::cerr << ERROR("[ERROR]-- ")<<WARNING(UNDERLINE("More threads than lines") )  <<std::endl;
+        exit(EXIT_FAILURE);
+    }
+    sizeForThreads = nLines/nThreads;
+    assignedLines=shareLines(file,nLines,nThreads);
+    for (int i = 0; i < nThreads; i++) {
+        begin=i*sizeForThreads+1;
+        end=begin+sizeForThreads-1;
+
+        if(nLines%nThreads!= 0 && i==nThreads-1){ //Aquí se realiza un ajuste para el ultimo hilo en el caso que no sea exacta la división de total de lineas entre el número de hilos.
+            end++;
+        }
+        vThreads.push_back(std::thread(find_word, i, assignedLines[i], begin, end, objective));
+    }
+
+    std::for_each(vThreads.begin(), vThreads.end(), std::mem_fn(&std::thread::join));
+}
 /* Es la función que ejecutaran los hilos y buscaran la palabra objetivo en el trozo de lineas asignado*/
 void find_word(int thread,std::vector<std::string> assignedLines, int begin, int end, std::string objective){
     std::string word;
