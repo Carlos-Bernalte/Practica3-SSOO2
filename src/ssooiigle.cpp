@@ -27,7 +27,7 @@
 #include <colours.h>
 #include "WordSearched.cpp"
 #include "Client.cpp"
-//#include "PaySystem.cpp"
+#include "PaySystem.cpp"
 #include "QueueProtected.cpp"
 
 void arguments_control(int argc, char *argv[],std::string &file, std::string &objective, int &nThreads);

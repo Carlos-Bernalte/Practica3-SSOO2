@@ -1,3 +1,4 @@
+#pragma once
 /*********************************************
 *   Project: Práctica 3 de Sistemas Operativos II 
 *
@@ -28,15 +29,10 @@ public:
     bool checkEmpty();
 };
 
-// QueueProtected::QueueProtected()
-// {
-// }
+QueueProtected::QueueProtected()
+{
+}
 
-// void QueueProtected::add(Client c){
-//     access.lock();
-//     queue.push(c);
-//     access.unlock();
-// }
 
 bool QueueProtected::checkEmpty(){
     return this->queue.empty();
