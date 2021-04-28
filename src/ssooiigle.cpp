@@ -24,9 +24,10 @@
 #include <string.h>
 #include <functional>
 #include <definitions.h>
-
 #include <colours.h>
 #include "WordSearched.cpp"
+#include "Client.cpp"
+#include "PaySystem.cpp"
 
 void arguments_control(int argc, char *argv[],std::string &file, std::string &objective, int &nThreads);
 int number_of_lines(std::string file);
@@ -37,22 +38,40 @@ std::vector<std::string> splitLine(std::string line);
 std::string analizeWord(std::string word);
 void printResult();
 
+void generateClients();
+/*Valores estáticos*/
+#define NCLIENTES 4
+
+/*Variables globales*/
 std::mutex access;
 std::vector<std::thread> vThreads;
+std::vector<std::thread> vClients;
 std::map<int,std::vector<WordSearched>> vWords;
 
 /* El main se encargara de la creación de hilos y su finalización*/
 int main(int argc, char *argv[]){
-    std::string file;
-    std::string objective;
-    int nThreads;
-    arguments_control(argc,argv,file,objective,nThreads);
-
-    create_threads( nThreads, file, objective);
+    PaySystem ps;
+    std::thread psT(ps);
+    generateClients();
     
-    printResult();
-
+    std::for_each(vClients.begin(), vClients.end(), std::mem_fn(&std::thread::join));
+    psT.join();
     return EXIT_SUCCESS;
+}
+void generateClients(){
+    int premium;
+    for(int i = 0; i<NCLIENTES; i++){
+        if(i%2==0){
+            vClients.push_back(std::thread(Client(i)));
+        }else{
+            premium = (rand()%2);
+            if(premium==0){
+                vClients.push_back(std::thread(Client(i,-1)));
+            }else{
+                vClients.push_back(std::thread(Client(i,100)));
+            }
+        }
+    }
 }
 int antiguoMain(int argc, char *argv[]){
     std::string file;
@@ -104,6 +123,7 @@ int number_of_lines(std::string file){
     } 
     return numLines;
 }
+
 void create_threads(int nThreads, std::string file, std::string objective){
     int nLines;
     int sizeForThreads;

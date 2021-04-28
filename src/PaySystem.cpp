@@ -14,7 +14,6 @@
 
 #include <iostream>
 #include <condition_variable>
-#include "Client.cpp"
 #include "QueueProtected.cpp"
 class PaySystem
 {
@@ -25,7 +24,11 @@ private:
 public:
     PaySystem();
     void rechargeBalance();
+    void operator () ();
 };
+void PaySystem::operator () (){
+        
+    }
 
 PaySystem::PaySystem()
 {
