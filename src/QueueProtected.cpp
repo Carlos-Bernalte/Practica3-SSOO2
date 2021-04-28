@@ -1,33 +1,38 @@
 #include <queue>
 #include <mutex>
-#include "Client.cpp"
+#include "Request.cpp"
 
 class QueueProtected
 {
 private:
     std::mutex access;
-    std::queue<Client> queue;
+    std::queue<Request> queue;
 public:
     QueueProtected();
-    void add(Client c);
-    Client remove();
+    void add(Request r);
+    Request remove();
+    bool checkEmpty();
 };
 
 QueueProtected::QueueProtected()
 {
 }
 
-void QueueProtected::add(Client c){
+bool QueueProtected::checkEmpty(){
+    return this->queue.empty();
+}
+
+void QueueProtected::add(Request r){
     access.lock();
-    queue.push(c);
+    queue.push(r);
     access.unlock();
 }
 
-Client QueueProtected::remove(){
+Request QueueProtected::remove(){
     access.lock();
-    Client c = queue.front();
+    Request r = queue.front();
     queue.pop();
     access.unlock();
-    return c;
+    return r;
 }
 

@@ -1,0 +1,6 @@
+make --dry-run --keep-going --print-directory
+make: se entra en el directorio '/home/paul/Escritorio/Repositorios/Practica3-SSOO2'
+mkdir -p bin/ exec/
+g++ -o exec/ssooiigle bin/ssooiigle.o -Iinclude/ -pthread -std=c++11
+make: se sale del directorio '/home/paul/Escritorio/Repositorios/Practica3-SSOO2'
+ 
