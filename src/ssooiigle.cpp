@@ -27,7 +27,7 @@
 #include <colours.h>
 #include "WordSearched.cpp"
 #include "Client.cpp"
-#include "PaySystem.cpp"
+//#include "PaySystem.cpp"
 
 void arguments_control(int argc, char *argv[],std::string &file, std::string &objective, int &nThreads);
 int number_of_lines(std::string file);
@@ -50,12 +50,12 @@ std::map<int,std::vector<WordSearched>> vWords;
 
 /* El main se encargara de la creación de hilos y su finalización*/
 int main(int argc, char *argv[]){
-    PaySystem ps;
-    std::thread psT(ps);
+    // PaySystem ps;
+    // std::thread psT(ps);
     generateClients();
     
     std::for_each(vClients.begin(), vClients.end(), std::mem_fn(&std::thread::join));
-    psT.join();
+    // psT.join();
     return EXIT_SUCCESS;
 }
 void generateClients(){
