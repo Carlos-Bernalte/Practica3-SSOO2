@@ -11,9 +11,11 @@
 *
 *   Revision History: Se puede encontrar en el repositorio de GitHub.
 |*********************************************/
+#ifndef CLIENT
+#define CLIENT
 
 #include <iostream>
-//#include <colours.h>
+#include <colours.h>
 
 class Client
 {
@@ -76,3 +78,5 @@ void Client::toString(){
         std::cout<<"[Cliente "<<id<<"]"<<std::endl;
     }
 }
+
+#endif

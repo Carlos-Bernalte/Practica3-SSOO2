@@ -1,3 +1,6 @@
+#ifndef QUEUE
+#define QUEUE
+
 #include <queue>
 #include <mutex>
 #include "Request.cpp"
@@ -14,15 +17,9 @@ public:
     bool checkEmpty();
 };
 
-// QueueProtected::QueueProtected()
-// {
-// }
-
-// void QueueProtected::add(Client c){
-//     access.lock();
-//     queue.push(c);
-//     access.unlock();
-// }
+QueueProtected::QueueProtected()
+{
+}
 
 bool QueueProtected::checkEmpty(){
     return this->queue.empty();
@@ -41,4 +38,4 @@ Request QueueProtected::remove(){
     access.unlock();
     return r;
 }
-
+ #endif

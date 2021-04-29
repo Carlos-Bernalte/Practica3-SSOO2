@@ -11,6 +11,8 @@
 *
 *   Revision History: Se puede encontrar en el repositorio de GitHub.
 |*********************************************/
+#ifndef PAYS
+#define PAYS
 
 #include <iostream>
 #include <condition_variable>
@@ -31,10 +33,11 @@ public:
 };
 void PaySystem::operator () (){
         
-    }
+}
 
-PaySystem::PaySystem()
+PaySystem::PaySystem(QueueProtected queue)
 {
+    this->q_request=queue;
 }
 
 void PaySystem::rechargeBalance()
@@ -45,3 +48,5 @@ void PaySystem::rechargeBalance()
         q_request.add(r);
     }
 }
+
+#endif

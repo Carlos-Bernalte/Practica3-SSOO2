@@ -1,3 +1,6 @@
+#ifndef REQUEST
+#define REQUEST
+
 #include <iostream>
 
 class Request{
@@ -28,3 +31,5 @@ float Request::getCredit(){
 void Request::setCredit(float credit){
     this->credit=credit;
 }
+
+#endif
