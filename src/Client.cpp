@@ -1,4 +1,4 @@
-#pragma once
+
 /*********************************************
 *   Project: Práctica 3 de Sistemas Operativos II 
 *
@@ -79,8 +79,5 @@ void Client::toString(){
         std::cout<<"[Cliente "<<id<<"]"<<std::endl;
     }
 }
-<<<<<<< HEAD
 
 #endif
-=======
->>>>>>> 5c7aeae686b4ceb48ba3bf30f2ca4e0a49671d70

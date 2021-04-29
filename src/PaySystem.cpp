@@ -1,4 +1,4 @@
-#pragma once
+
 /*********************************************
 *   Project: Práctica 3 de Sistemas Operativos II 
 *
@@ -28,17 +28,18 @@ private:
     QueueProtected q_request;
 
 public:
-    PaySystem();
+    PaySystem(QueueProtected queue);
     void rechargeBalance();
     void operator () ();
 };
-void PaySystem::operator () (){
-        
-}
 
 PaySystem::PaySystem(QueueProtected queue)
 {
     this->q_request=queue;
+}
+
+void PaySystem::operator () (){
+        
 }
 
 void PaySystem::rechargeBalance()

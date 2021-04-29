@@ -44,7 +44,6 @@ void generateClients();
 #define NCLIENTES 4
 
 /*Variables globales*/
-QueueProtected q_request;
 std::mutex access;
 std::vector<std::thread> vThreads;
 std::vector<std::thread> vClients;

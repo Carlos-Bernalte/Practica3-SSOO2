@@ -1,22 +1,5 @@
-<<<<<<< HEAD
-#ifndef QUEUE
-#define QUEUE
-=======
-#pragma once
-/*********************************************
-*   Project: Práctica 3 de Sistemas Operativos II 
-*
-*   Program name: Client.c
-*
-*   Author: Carlos Bernalte García-Junco
-*
-*   Date created: 24-03-2021
-*
-*   Porpuse: Clases para almacenar información relacionada con palabras buscadas.
-*
-*   Revision History: Se puede encontrar en el repositorio de GitHub.
-|*********************************************/
->>>>>>> 5c7aeae686b4ceb48ba3bf30f2ca4e0a49671d70
+#ifndef QUEU
+#define QUEU
 
 #include <queue>
 #include <mutex>
@@ -29,6 +12,7 @@ private:
     std::queue<Request> queue;
 public:
     QueueProtected();
+    void operator = (const QueueProtected &);
     void add(Request r);
     Request remove();
     bool checkEmpty();
@@ -37,11 +21,9 @@ public:
 QueueProtected::QueueProtected()
 {
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> 5c7aeae686b4ceb48ba3bf30f2ca4e0a49671d70
-
+void QueueProtected::operator = (const QueueProtected &){
+        
+}
 bool QueueProtected::checkEmpty(){
     return this->queue.empty();
 }
