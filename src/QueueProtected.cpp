@@ -4,10 +4,10 @@
 #include <queue>
 #include <mutex>
 #include "Request.cpp"
-
 class QueueProtected
 {
 private:
+    
     std::mutex access;
     std::queue<Request> queue;
 public:

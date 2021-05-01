@@ -25,10 +25,12 @@
 #include <functional>
 #include <definitions.h>
 #include <colours.h>
+#include <atomic>
 #include "WordSearched.cpp"
 #include "Client.cpp"
 #include "PaySystem.cpp"
 #include "QueueProtected.cpp"
+#include "SemCounter2.cpp"
 
 void arguments_control(int argc, char *argv[],std::string &file, std::string &objective, int &nThreads);
 int number_of_lines(std::string file);
@@ -41,9 +43,11 @@ void printResult();
 
 void generateClients();
 /*Valores estáticos*/
-#define NCLIENTES 4
-
+#define NCLIENTS 4
+#define NTHREADS 50
+#define BUFFER 4
 /*Variables globales*/
+SemCounter sem(BUFFER);
 std::mutex access;
 std::vector<std::thread> vThreads;
 std::vector<std::thread> vClients;
@@ -51,22 +55,31 @@ std::map<int,std::vector<WordSearched>> vWords;
 
 /* El main se encargara de la creación de hilos y su finalización*/
 int main(int argc, char *argv[]){
-    generateClients();
+    int premium;
+    std::string word;
+    for(int i = 0; i<NCLIENTS; i++){
+        sem.wait();
+        word = WORDS[(rand()%WORDS.size())];
+        vClients.push_back(std::thread(Client(i,-1, word)));
+    }
+    
     
     std::for_each(vClients.begin(), vClients.end(), std::mem_fn(&std::thread::join));
     return EXIT_SUCCESS;
 }
 void generateClients(){
     int premium;
-    for(int i = 0; i<NCLIENTES; i++){
+    std::string word;
+    for(int i = 0; i<NCLIENTS; i++){
+        word = WORDS[(rand()%WORDS.size())];
         if(i%2==0){
-            vClients.push_back(std::thread(Client(i)));
+            vClients.push_back(std::thread(Client(i,word)));
         }else{
             premium = (rand()%2);
             if(premium==0){
-                vClients.push_back(std::thread(Client(i,-1)));
+                vClients.push_back(std::thread(Client(i,-1, word)));
             }else{
-                vClients.push_back(std::thread(Client(i,100)));
+                vClients.push_back(std::thread(Client(i,100, word)));
             }
         }
     }
@@ -171,6 +184,7 @@ void find_word(int thread,std::vector<std::string> assignedLines, int begin, int
         }
             
     }
+    sem.signal();
 }
 /* Se encarga de formatear una palabra para compararla con la con la palabra objetivo*/
 std::string analizeWord(std::string word){
