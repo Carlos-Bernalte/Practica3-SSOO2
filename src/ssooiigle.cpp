@@ -78,7 +78,7 @@ int main(int argc, char *argv[]){
         }
     }
     
-    std::for_each(vClients.begin(), vClients.end(), std::mem_fn(&std::thread::join));
+    //std::for_each(vClients.begin(), vClients.end(), std::mem_fn(&std::thread::join));
     return EXIT_SUCCESS;
 }
 
@@ -101,11 +101,12 @@ void list_dir(){
     }
     closedir(directorio);    
 }
+
 void generateClient(Client c){
     std::vector<std::thread> vSearch;
     for (int i = 0; i < 10; i++)
     {
-         //vSearch.push_back(std::thread(create_threads, "Prueba.txt", std::ref(c)));
+         //vSearch.push_back(std::thread(create_threads, vLibros[i], std::ref(c)));
     }
     
     std::for_each(vSearch.begin(), vSearch.end(), std::mem_fn(&std::thread::join));
