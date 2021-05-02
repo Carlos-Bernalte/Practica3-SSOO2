@@ -30,6 +30,7 @@ private:
 public:
     PaySystem(QueueProtected queue);
     void rechargeBalance();
+    void addRequest();
     void operator () ();
 };
 
@@ -41,6 +42,7 @@ PaySystem::PaySystem(QueueProtected queue)
 void PaySystem::operator () (){
         
 }
+
 
 void PaySystem::rechargeBalance()
 {

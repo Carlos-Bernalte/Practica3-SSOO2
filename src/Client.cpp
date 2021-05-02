@@ -16,7 +16,9 @@
 #define CLIENT
 
 #include <iostream>
+#include <mutex>
 #include <colours.h>
+#include "WordSearched.cpp"
 
 class Client
 {
@@ -25,6 +27,7 @@ class Client
         float balance;
         std::string objective;
         bool premium;
+        std::mutex access;
     
     public:
         Client(int id, std::string objective);
@@ -32,6 +35,7 @@ class Client
         void toString();
         int getId();
         float getBalance();
+        std::string getObjective();
         bool isPremium();
         void payCredit();
         void restoreCredits();
@@ -60,16 +64,26 @@ int Client::getId(){
     return this->id;
 }
 float Client::getBalance(){
+    access.lock();
     return this->balance;
+    access.unlock();
 }
 bool Client::isPremium(){
     return this->premium;
 }
 void Client::payCredit(){
+    access.lock();
     this->balance--;
+    access.unlock();
 }
 void Client::restoreCredits(){
+    access.lock();
     this->balance=100;
+    access.unlock();
+}
+
+std::string Client::getObjective(){
+    return this->objective;
 }
 
 void Client::toString(){

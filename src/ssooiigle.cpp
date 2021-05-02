@@ -32,20 +32,21 @@
 #include "QueueProtected.cpp"
 #include "SemCounter2.cpp"
 
-void arguments_control(int argc, char *argv[],std::string &file, std::string &objective, int &nThreads);
+/*Funciones definidas*/
 int number_of_lines(std::string file);
-void create_threads(int nThreads, std::string file, std::string objective);
-void find_word(int thread,std::vector<std::string> assignedLines, int begin, int end, std::string objective);
-std::map<int, std::vector<std::string>> shareLines(std::string file, int nLines, int nThreads);
+void create_threads(std::string file, Client c);
+void find_word(int thread,std::vector<std::string> assignedLines, int begin, int end, Client c);
+std::map<int, std::vector<std::string>> shareLines(std::string file, int nLines);
 std::vector<std::string> splitLine(std::string line);
 std::string analizeWord(std::string word);
 void printResult();
 
-void generateClients();
+void generateClient(Client c);
 /*Valores estáticos*/
 #define NCLIENTS 4
-#define NTHREADS 50
+#define NTHREADS 10
 #define BUFFER 4
+
 /*Variables globales*/
 SemCounter sem(BUFFER);
 std::mutex access;
@@ -60,67 +61,33 @@ int main(int argc, char *argv[]){
     for(int i = 0; i<NCLIENTS; i++){
         sem.wait();
         word = WORDS[(rand()%WORDS.size())];
-        vClients.push_back(std::thread(Client(i,-1, word)));
+        if(i%2==0){
+            //vClients.push_back(std::thread(Client(i,word)));
+        }else{
+            premium = (rand()%2);
+            if(premium==0){
+                //vClients.push_back(std::thread(generateClient, Client(i,-1, word)));
+            }else{
+                //vClients.push_back(std::thread(Client(i,100, word)));
+            }
+        }
     }
-    
     
     std::for_each(vClients.begin(), vClients.end(), std::mem_fn(&std::thread::join));
     return EXIT_SUCCESS;
 }
-void generateClients(){
-    int premium;
-    std::string word;
-    for(int i = 0; i<NCLIENTS; i++){
-        word = WORDS[(rand()%WORDS.size())];
-        if(i%2==0){
-            vClients.push_back(std::thread(Client(i,word)));
-        }else{
-            premium = (rand()%2);
-            if(premium==0){
-                vClients.push_back(std::thread(Client(i,-1, word)));
-            }else{
-                vClients.push_back(std::thread(Client(i,100, word)));
-            }
-        }
-    }
-}
-int antiguoMain(int argc, char *argv[]){
-    std::string file;
-    std::string objective;
-    int nThreads;
-    arguments_control(argc,argv,file,objective,nThreads);
-
-    create_threads( nThreads, file, objective);
-    
-    printResult();
-
-    return EXIT_SUCCESS;
-}
-
-/* Controlar los argumentos que pasamos a la hora de ejecutarlo*/
-void arguments_control(int argc, char *argv[],std::string &file, std::string &objective, int &nThreads){
-    if(argc!=4){
-        std::cerr <<ERROR("[ERROR]-- ")<<WARNING(UNDERLINE("Number of arguments is incorrect") ) <<std::endl;
-        exit(EXIT_FAILURE);
-    } 
-    std::string archivo =LIBROS + std::string(argv[1]);
-    std::ifstream File(archivo);
-    if(File.good()){
-        file=archivo;
-    }else{
-        std::cerr << ERROR("[ERROR]-- ")<<WARNING(UNDERLINE("File does not exits.") )  <<std::endl;
-        exit(EXIT_FAILURE);
+void generateClient(Client c){
+    std::vector<std::thread> vSearch;
+    for (int i = 0; i < 10; i++)
+    {
+         //vSearch.push_back(std::thread(create_threads, "Prueba.txt", std::ref(c)));
     }
     
-    objective=argv[2];
-    if(isdigit(atoi(argv[3]))==0){
-        nThreads=atoi(argv[3]);
-    }else{
-        std::cerr << ERROR("[ERROR]-- ")<<WARNING(UNDERLINE("Please, introduce a valid number of threads.") )  <<std::endl;
-        exit(EXIT_FAILURE);
-    }
-    
+    std::for_each(vSearch.begin(), vSearch.end(), std::mem_fn(&std::thread::join));
+
+    c.toString();
 }
+
 /* Devuelve el número de lineas de un archivo.*/
 int number_of_lines(std::string file){
     int numLines = 0; 
@@ -135,33 +102,33 @@ int number_of_lines(std::string file){
     return numLines;
 }
 
-void create_threads(int nThreads, std::string file, std::string objective){
+void create_threads(std::string file, Client c){
     int nLines;
     int sizeForThreads;
     std::map<int, std::vector<std::string>> assignedLines;
     int begin, end;
 
     nLines=number_of_lines(file);
-    if(nLines<nThreads){
+    if(nLines<NTHREADS){
         std::cerr << ERROR("[ERROR]-- ")<<WARNING(UNDERLINE("More threads than lines") )  <<std::endl;
         exit(EXIT_FAILURE);
     }
-    sizeForThreads = nLines/nThreads;
-    assignedLines=shareLines(file,nLines,nThreads);
-    for (int i = 0; i < nThreads; i++) {
+    sizeForThreads = nLines/NTHREADS;
+    assignedLines=shareLines(file,nLines);
+    for (int i = 0; i < NTHREADS; i++) {
         begin=i*sizeForThreads+1;
         end=begin+sizeForThreads-1;
 
-        if(nLines%nThreads!= 0 && i==nThreads-1){ //Aquí se realiza un ajuste para el ultimo hilo en el caso que no sea exacta la división de total de lineas entre el número de hilos.
+        if(nLines%NTHREADS!= 0 && i==NTHREADS-1){ //Aquí se realiza un ajuste para el ultimo hilo en el caso que no sea exacta la división de total de lineas entre el número de hilos.
             end++;
         }
-        vThreads.push_back(std::thread(find_word, i, assignedLines[i], begin, end, objective));
+        //vThreads.push_back(std::thread(find_word, i, assignedLines[i], begin, end, c));
     }
 
     std::for_each(vThreads.begin(), vThreads.end(), std::mem_fn(&std::thread::join));
 }
 /* Es la función que ejecutaran los hilos y buscaran la palabra objetivo en el trozo de lineas asignado*/
-void find_word(int thread,std::vector<std::string> assignedLines, int begin, int end, std::string objective){
+void find_word(int thread,std::vector<std::string> assignedLines, int begin, int end, Client c){
     std::string word;
     std::string solution[3]; //vector de 3 posiciones para guardar la palabra anterior (0), la palabra encontrada (1) y la palabra siguiente (2).
     std::vector<std::string> line;
@@ -169,14 +136,19 @@ void find_word(int thread,std::vector<std::string> assignedLines, int begin, int
         line = splitLine(assignedLines[nLine]);
         solution[0]=""; //En caso que se salte a una nueva linea se reseteara el valor de la palabra anterior
         for(std::size_t position = 0; position< line.size(); position++){
-            if(!analizeWord(objective).compare(analizeWord(line[position]))){
+            if(!analizeWord(c.getObjective()).compare(analizeWord(line[position]))){
+                if(c.getBalance()==0){
+                    //ps.rechargeBalance();
+                }else{
+                    c.payCredit();
+                }
                 solution[1]=line[position];
                 if(position+1==line.size()){ // En el caso que se encuentre la palabra objetivo al final de la linea, el valor de la palabra siguiente sera nulo 
                     solution[2]="";
                 }else{
                     solution[2]=line[position+1];
                 }
-                WordSearched wordFounded(objective, thread, begin, end, nLine+begin, solution[0], solution[1], solution[2]);
+                WordSearched wordFounded(c.getObjective(), thread, begin, end, nLine+begin, solution[0], solution[1], solution[2]);
                 std::lock_guard<std::mutex> semaphore(access); //Aquí bloquearemos el acceso a la estructura de datos
                 vWords[thread].push_back(wordFounded);
             }
@@ -208,17 +180,17 @@ std::vector<std::string> splitLine(std::string line){
 }
 
 /* Asignara a cada hilo el número correspondiente de linea a leer*/
-std::map<int,std::vector<std::string>> shareLines(std::string file, int nLines, int nThreads){
+std::map<int,std::vector<std::string>> shareLines(std::string file, int nLines){
     std::ifstream File(file);
     std::string line;
     std::map<int, std::vector<std::string>> result;
-    int sizeOfThreads = nLines/nThreads;
-    for(int i = 0; i < nThreads; i++){
+    int sizeOfThreads = nLines/NTHREADS;
+    for(int i = 0; i < NTHREADS; i++){
         for (int j = 0; j < sizeOfThreads; j++){
             std::getline(File, line);
             result[i].push_back(line);
         }
-        if(i==nThreads-1 && nLines%nThreads!= 0){
+        if(i==NTHREADS-1 && nLines%NTHREADS!= 0){
                 std::getline(File, line);
                 result[i].push_back(line);
             }

@@ -11,7 +11,8 @@
 *
 *   Revision History: Se puede encontrar en el repositorio de GitHub.
 |*********************************************/
-
+#ifndef WORD
+#define WORD
 #include <iostream>
 #include <colours.h>
 
@@ -49,3 +50,5 @@ void WordSearched::toString(){
 }
 
 
+
+#endif
