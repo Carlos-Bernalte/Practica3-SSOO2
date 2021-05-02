@@ -4,7 +4,7 @@ DIRHEA := include/
 DIRSRC := src/
 
 CFLAGS := -c -Wall -ansi
-LDLIBS := -I$(DIRHEA) -pthread -std=c++11
+LDLIBS := -I$(DIRHEA) -pthread -std=c++17
 CC := g++
 
 all : dirs ssooiigle

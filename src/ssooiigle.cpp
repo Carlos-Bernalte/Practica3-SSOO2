@@ -26,6 +26,7 @@
 #include <definitions.h>
 #include <colours.h>
 #include <atomic>
+#include <dirent.h>
 #include "WordSearched.cpp"
 #include "Client.cpp"
 #include "PaySystem.cpp"
@@ -40,6 +41,7 @@ std::map<int, std::vector<std::string>> shareLines(std::string file, int nLines)
 std::vector<std::string> splitLine(std::string line);
 std::string analizeWord(std::string word);
 void printResult();
+void list_dir();
 
 void generateClient(Client c);
 /*Valores estáticos*/
@@ -52,12 +54,15 @@ SemCounter sem(BUFFER);
 std::mutex access;
 std::vector<std::thread> vThreads;
 std::vector<std::thread> vClients;
+std::vector<std::string> vLibros;
 std::map<int,std::vector<WordSearched>> vWords;
+
 
 /* El main se encargara de la creación de hilos y su finalización*/
 int main(int argc, char *argv[]){
     int premium;
     std::string word;
+    list_dir();
     for(int i = 0; i<NCLIENTS; i++){
         sem.wait();
         word = WORDS[(rand()%WORDS.size())];
@@ -75,6 +80,26 @@ int main(int argc, char *argv[]){
     
     std::for_each(vClients.begin(), vClients.end(), std::mem_fn(&std::thread::join));
     return EXIT_SUCCESS;
+}
+
+void list_dir(){
+    std::string dirPath="./libros";
+    DIR * directorio;
+    struct dirent *elemento;
+    std::string elem;
+
+    if(directorio = opendir(dirPath.c_str())){
+        while(elemento = readdir(directorio)){
+            elem = elemento->d_name;
+            if(elem != "." && elem!=".."){
+                std::cout<<elem<<std::endl;
+                vLibros.push_back(elem);
+            }
+            
+        }
+    
+    }
+    closedir(directorio);    
 }
 void generateClient(Client c){
     std::vector<std::thread> vSearch;
