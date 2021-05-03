@@ -1,4 +1,4 @@
-#define LIBROS "./libros/"
+#define LIBROS "./libros"
 std::vector<std::string> WORDS =
 {
     "lineas",

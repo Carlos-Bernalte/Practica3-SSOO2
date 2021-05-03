@@ -40,25 +40,26 @@ class Client
         void payCredit();
         void restoreCredits();
         void operator () ();
+
 };
 void Client::operator () (){
-        
-    }
-
+    
+}
+/*Constructor cliente gratis*/
 Client::Client(int id, std::string objective)
 {   
     this->id=id;
+    this->balance=50;
     this->objective = objective;
     this->premium = false;
-    toString();
 }
+/*Constructor cliente premium*/
 Client::Client(int id, float balance, std::string objective)
 {   
     this->id=id;
     this->balance = balance;
     this->objective = objective;
     this->premium = true;
-    toString();
 }
 int Client::getId(){
     return this->id;

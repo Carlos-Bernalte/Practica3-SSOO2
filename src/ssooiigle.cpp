@@ -35,7 +35,7 @@
 
 /*Funciones definidas*/
 int number_of_lines(std::string file);
-void create_threads(std::string file, Client c);
+void create_threads(std::string file, Client& c);
 void find_word(int thread,std::vector<std::string> assignedLines, int begin, int end, Client c);
 std::map<int, std::vector<std::string>> shareLines(std::string file, int nLines);
 std::vector<std::string> splitLine(std::string line);
@@ -43,10 +43,10 @@ std::string analizeWord(std::string word);
 void printResult();
 void list_dir();
 
-void generateClient(Client c);
+void generateClient(int id,bool prem ,std::string word);
 /*Valores estáticos*/
 #define NCLIENTS 4
-#define NTHREADS 10
+#define NTHREADS 4
 #define BUFFER 4
 
 /*Variables globales*/
@@ -60,25 +60,20 @@ std::map<int,std::vector<WordSearched>> vWords;
 
 /* El main se encargara de la creación de hilos y su finalización*/
 int main(int argc, char *argv[]){
-    int premium;
+    //int premium;
     std::string word;
     list_dir();
     for(int i = 0; i<NCLIENTS; i++){
         sem.wait();
         word = WORDS[(rand()%WORDS.size())];
         if(i%2==0){
-            //vClients.push_back(std::thread(Client(i,word)));
+            vClients.push_back(std::thread(generateClient, i, false, word));
         }else{
-            premium = (rand()%2);
-            if(premium==0){
-                //vClients.push_back(std::thread(generateClient, Client(i,-1, word)));
-            }else{
-                //vClients.push_back(std::thread(Client(i,100, word)));
-            }
+            vClients.push_back(std::thread(generateClient, i, true, word));
         }
     }
     
-    //std::for_each(vClients.begin(), vClients.end(), std::mem_fn(&std::thread::join));
+    std::for_each(vClients.begin(), vClients.end(), std::mem_fn(&std::thread::join));
     return EXIT_SUCCESS;
 }
 
@@ -87,37 +82,52 @@ void list_dir(){
     DIR * directorio;
     struct dirent *elemento;
     std::string elem;
-
-    if(directorio = opendir(dirPath.c_str())){
-        while(elemento = readdir(directorio)){
+    std::string ss;
+    if((directorio = opendir(dirPath.c_str()))){
+        while((elemento = readdir(directorio))){
             elem = elemento->d_name;
             if(elem != "." && elem!=".."){
-                std::cout<<elem<<std::endl;
                 vLibros.push_back(elem);
-            }
-            
+            }  
+        
         }
     
     }
     closedir(directorio);    
 }
 
-void generateClient(Client c){
+void generateClient(int id, bool premiun, std::string word){
     std::vector<std::thread> vSearch;
-    for (int i = 0; i < 10; i++)
-    {
-         //vSearch.push_back(std::thread(create_threads, vLibros[i], std::ref(c)));
+    float credit;
+    if(premiun){
+        if(rand()%2==0){
+            /*Cuenta premium sin limite de credito*/
+            Client c(id, -1, word);
+        }else{
+            /*Cuenta premium con limite de credito*/
+            srand(time(NULL));
+            credit = rand()%50+1;
+            //Client c(id, credit, word);
+        }
+    }else{
+        /*Cliente cuenta gratuita*/
+        //Client c(id, word);
+    }
+    
+    
+    for (std::size_t i = 0; i < vLibros.size(); i++){
+        vSearch.push_back(std::thread(create_threads, vLibros[i], std::ref(c)));
     }
     
     std::for_each(vSearch.begin(), vSearch.end(), std::mem_fn(&std::thread::join));
 
-    c.toString();
 }
 
 /* Devuelve el número de lineas de un archivo.*/
 int number_of_lines(std::string file){
-    int numLines = 0; 
-    std::ifstream File(file); 
+    int numLines = 0;
+    std::string dir = "./libros/"+file;
+    std::ifstream File(dir); 
 
     while (File.good()) 
     { 
@@ -128,13 +138,14 @@ int number_of_lines(std::string file){
     return numLines;
 }
 
-void create_threads(std::string file, Client c){
+void create_threads(std::string file, Client& c){
     int nLines;
     int sizeForThreads;
     std::map<int, std::vector<std::string>> assignedLines;
     int begin, end;
 
     nLines=number_of_lines(file);
+    std::cout<<"[CLiente "<<c.getId()<<"] "<<nLines<<"-"<<file<<std::endl;
     if(nLines<NTHREADS){
         std::cerr << ERROR("[ERROR]-- ")<<WARNING(UNDERLINE("More threads than lines") )  <<std::endl;
         exit(EXIT_FAILURE);
@@ -148,7 +159,7 @@ void create_threads(std::string file, Client c){
         if(nLines%NTHREADS!= 0 && i==NTHREADS-1){ //Aquí se realiza un ajuste para el ultimo hilo en el caso que no sea exacta la división de total de lineas entre el número de hilos.
             end++;
         }
-        //vThreads.push_back(std::thread(find_word, i, assignedLines[i], begin, end, c));
+        //vThreads.push_back(std::thread(find_word, i, assignedLines[i], begin, end, std::ref(c)));
     }
 
     std::for_each(vThreads.begin(), vThreads.end(), std::mem_fn(&std::thread::join));
