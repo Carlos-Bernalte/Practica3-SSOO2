@@ -77,7 +77,6 @@ int main(int argc, char *argv[]){
             }
         }
     }
-    
     //std::for_each(vClients.begin(), vClients.end(), std::mem_fn(&std::thread::join));
     return EXIT_SUCCESS;
 }
