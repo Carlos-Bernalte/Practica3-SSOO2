@@ -6,16 +6,16 @@
 class Request{
     private:
         int id;
-        float credit;
+        int credit;
 
     public:
-        Request(int id, float credit);
+        Request(int id, int credit);
         int getID();
-        float getCredit();
-        void setCredit(float credit);
+        int getCredit();
+        void setCredit(int credit);
 };
 
-Request::Request(int id, float credit){
+Request::Request(int id, int credit){
     this->id = id;
     this->credit = credit;
 }
@@ -24,11 +24,11 @@ int Request::getID(){
     return this->id;
 }
 
-float Request::getCredit(){
+int Request::getCredit(){
     return this->credit;
 }
 
-void Request::setCredit(float credit){
+void Request::setCredit(int credit){
     this->credit=credit;
 }
 

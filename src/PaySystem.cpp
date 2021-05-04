@@ -28,25 +28,18 @@ private:
     QueueProtected q_request;
 
 public:
-    void rechargeBalance();
-    void operator () ();
+    void operator () (QueueProtected requests);
 };
 
-void PaySystem::operator () (){
+void PaySystem::operator () (QueueProtected requests){
     while(1){
-        if(!this->q_request.checkEmpty()){
-            rechargeBalance();
+        if(!requests.checkEmpty()){
+            if(!q_request.checkEmpty()){
+                Request r = q_request.remove();
+                r.setCredit(100);
+                q_request.add(r);
+            }
         }
-    }
-}
-
-
-void PaySystem::rechargeBalance()
-{
-    if(!q_request.checkEmpty()){
-        Request r = q_request.remove();
-        r.setCredit(100);
-        q_request.add(r);
     }
 }
 

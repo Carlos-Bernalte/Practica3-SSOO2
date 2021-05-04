@@ -65,7 +65,6 @@ int main(int argc, char *argv[]){
     std::string word;
     list_dir();
     for(int i = 0; i<NCLIENTS; i++){
-        //sem.wait();
         word = WORDS[(rand()%WORDS.size())];
         generateClient(i);
         // if(i%2==0){
@@ -94,7 +93,7 @@ void list_dir(){
     std::string elem;
     std::string ss;
     if((directorio = opendir(dirPath.c_str()))){
-        while((elemento = readdir(directorio))){
+        while((elemento = readdir(directoriotd))){
             elem = elemento->d_name;
             if(elem != "." && elem!=".."){
                 vLibros.push_back(elem);
@@ -108,14 +107,17 @@ void list_dir(){
 
 void generateClient(int id){
     std::vector<std::thread> vSearch;
-    Client c;
-    std::thread(c,id);
+    std::mutex access;
+
+    sem.wait();
+    vClients.push_back(Client());
     /*
     for (std::size_t i = 0; i < vLibros.size(); i++){
         vSearch.push_back(std::thread(create_threads, vLibros[i], std::ref(c)));
     }
     std::for_each(vSearch.begin(), vSearch.end(), std::mem_fn(&std::thread::join));
     */
+    sem.signal();
 }
 
 /* Devuelve el número de lineas de un archivo.*/
@@ -196,7 +198,7 @@ std::string analizeWord(std::string word){
     for (std::size_t i = 0; i < word.length(); i++) { //Esto sera para pasarlos a minuscula
         word[i] = tolower(word[i]);
     }
-     std::remove_copy_if(word.begin(), word.end(), std::back_inserter(result), std::ptr_fun<int, int>(&std::ispunct));//Y esto para eliminar simbilos que no sean letras
+    std::remove_copy_if(word.begin(), word.end(), std::back_inserter(result), std::ptr_fun<int, int>(&std::ispunct));//Y esto para eliminar simbilos que no sean letras
     return result;
 }
 

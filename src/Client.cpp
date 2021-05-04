@@ -17,19 +17,21 @@
 
 #include <iostream>
 #include <mutex>
+#include <atomic>
 #include <colours.h>
 #include "WordSearched.cpp"
 
 class Client{
     private:
         int id;
+        int init_balance;
         int balance;
         std::string objective;
         bool premium;
-        std::mutex access;
+        
     
     public:
-        Client(int id, std::string objective, int balance, bool premium);
+        Client(int id, std::string objective, int balance, int premium);
         void toString();
         int getId();
         float getBalance();
@@ -39,18 +41,18 @@ class Client{
         void restoreCredits();     
 };
 
-Client::Client(int id, std::string objective, int balance, bool premium){
+Client::Client(int id, std::string objective, int balance, int premium){
     this->id=id;
-    // if(premium){
-    //     if(rand()%2==0){
-    //         this->balance=-1;
-    //     }else{
-    //         this->balance=balance;
-    //     }
-    // }else{
-    //     this->balance=50;
-    // }
-    this->balance=balance;
+    if(premium){
+        if(rand()%2==0){
+            this->balance=-1;
+        }else{
+            this->balance=balance;
+        }
+    }else{
+        this->balance=50;
+    }
+    this->init_balance=this->balance;
     this->objective = objective;
     this->premium = premium;
     toString();
@@ -60,22 +62,16 @@ int Client::getId(){
     return this->id;
 }
 float Client::getBalance(){
-    access.lock();
     return this->balance;
-    access.unlock();
 }
 bool Client::isPremium(){
     return this->premium;
 }
 void Client::payCredit(){
-    access.lock();
     this->balance--;
-    access.unlock();
 }
 void Client::restoreCredits(){
-    access.lock();
-    this->balance=100;
-    access.unlock();
+    this->balance=this->init_balance;
 }
 
 std::string Client::getObjective(){
@@ -85,12 +81,12 @@ std::string Client::getObjective(){
 void Client::toString(){
     if(this->premium){
         if(this->balance==-1){
-            std::cout<<"[Cliente "<<id<<"] Saldo: UNLIMITED"<<std::endl;
+            std::cout<<BLUE<<"[Cliente "<<id<<"]"<<"-- Cuenta: Premium -- Palabra: "<<this->objective<<" -- Saldo: UNLIMITED"<<std::endl;
         }else{
-            std::cout<<"[Cliente "<<id<<"] Palabra: "<<this->objective<<std::endl;
+            std::cout<<BLUE<<"[Cliente "<<id<<"] -- Cuenta: Premium -- Palabra: "<<this->objective<<" -- Saldo: "<<this->balance<<std::endl;
         } 
     }else{
-        std::cout<<"[Cliente "<<id<<"]"<<std::endl;
+        std::cout<<BLUE<<"[Cliente "<<id<<"] Cuenta: Gratis -- Palabra: "<<this->objective<<" -- Saldo: "<<this->balance<<std::endl;
     }
 }
 
