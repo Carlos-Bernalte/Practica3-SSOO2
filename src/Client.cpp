@@ -50,7 +50,7 @@ Client::Client(int id, std::string objective, int balance, int premium){
             this->balance=balance;
         }
     }else{
-        this->balance=50;
+        this->balance=2;
     }
     this->init_balance=this->balance;
     this->objective = objective;
