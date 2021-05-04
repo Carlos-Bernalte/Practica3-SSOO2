@@ -7,10 +7,13 @@ CFLAGS := -c -Wall -ansi
 LDLIBS := -I$(DIRHEA) -pthread -std=c++17
 CC := g++
 
-all : dirs ssooiigle
+all : dirs main ssooiigle
 
 dirs:
-	mkdir -p $(DIROBJ) $(DIREXE)
+	mkdir -p $(DIROBJ) $(DIREXE
+
+main:$(DIROBJ)main.o 
+	$(CC) -o $(DIREXE)$@ $^ $(LDLIBS)
 
 ssooiigle: $(DIROBJ)ssooiigle.o 
 	$(CC) -o $(DIREXE)$@ $^ $(LDLIBS)
@@ -30,6 +33,9 @@ $(DIROBJ)%.o: $(DIRSRC)%.cpp
 
 test:
 	./$(DIREXE)ssooiigle
+
+test2:
+	./$(DIREXE)main
 
 clean :
 	rm -rf *~ core $(DIROBJ) $(DIREXE)

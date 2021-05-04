@@ -43,7 +43,7 @@ std::string analizeWord(std::string word);
 void printResult();
 void list_dir();
 
-void generateClient(int id,bool prem ,std::string word);
+void generateClient(int id);
 /*Valores estáticos*/
 #define NCLIENTS 4
 #define NTHREADS 4
@@ -53,28 +53,38 @@ void generateClient(int id,bool prem ,std::string word);
 SemCounter sem(BUFFER);
 std::mutex access;
 std::vector<std::thread> vThreads;
-std::vector<std::thread> vClients;
+std::vector<Client> vClients;
 std::vector<std::string> vLibros;
 std::map<int,std::vector<WordSearched>> vWords;
 
 
 /* El main se encargara de la creación de hilos y su finalización*/
 int main(int argc, char *argv[]){
+    int premium;
     //int premium;
     std::string word;
     list_dir();
     for(int i = 0; i<NCLIENTS; i++){
-        sem.wait();
+        //sem.wait();
         word = WORDS[(rand()%WORDS.size())];
-        if(i%2==0){
-            vClients.push_back(std::thread(generateClient, i, false, word));
-        }else{
-            vClients.push_back(std::thread(generateClient, i, true, word));
-        }
+        generateClient(i);
+        // if(i%2==0){
+        //     /**/
+        //     Client c(i,word);
+        //     vClients.push_back(std::thread(generateClient, std::ref(c)));
+        // }else{
+        //     premium = (rand()%2);
+        //     if(premium==0){
+        //         Client c(i,-1, word);
+        //         vClients.push_back(std::thread(generateClient, std::ref(c)));
+        //     }else{
+        //         Client c(i,100, word);
+        //         vClients.push_back(std::thread(generateClient, std::ref(c)));
+        //     }
+        // }
     }
-    
-    std::for_each(vClients.begin(), vClients.end(), std::mem_fn(&std::thread::join));
-    return EXIT_SUCCESS;
+    std::for_each(vThreads.begin(), vThreads.end(), std::mem_fn(&std::thread::join));
+
 }
 
 void list_dir(){
@@ -96,31 +106,16 @@ void list_dir(){
     closedir(directorio);    
 }
 
-void generateClient(int id, bool premiun, std::string word){
+void generateClient(int id){
     std::vector<std::thread> vSearch;
-    float credit;
-    if(premiun){
-        if(rand()%2==0){
-            /*Cuenta premium sin limite de credito*/
-            Client c(id, -1, word);
-        }else{
-            /*Cuenta premium con limite de credito*/
-            srand(time(NULL));
-            credit = rand()%50+1;
-            //Client c(id, credit, word);
-        }
-    }else{
-        /*Cliente cuenta gratuita*/
-        //Client c(id, word);
-    }
-    
-    
+    Client c;
+    std::thread(c,id);
+    /*
     for (std::size_t i = 0; i < vLibros.size(); i++){
         vSearch.push_back(std::thread(create_threads, vLibros[i], std::ref(c)));
     }
-    
     std::for_each(vSearch.begin(), vSearch.end(), std::mem_fn(&std::thread::join));
-
+    */
 }
 
 /* Devuelve el número de lineas de un archivo.*/

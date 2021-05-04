@@ -28,19 +28,16 @@ private:
     QueueProtected q_request;
 
 public:
-    PaySystem(QueueProtected queue);
     void rechargeBalance();
-    void addRequest();
     void operator () ();
 };
 
-PaySystem::PaySystem(QueueProtected queue)
-{
-    this->q_request=queue;
-}
-
 void PaySystem::operator () (){
-        
+    while(1){
+        if(!this->q_request.checkEmpty()){
+            rechargeBalance();
+        }
+    }
 }
 
 

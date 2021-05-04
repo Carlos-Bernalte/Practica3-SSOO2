@@ -20,47 +20,42 @@
 #include <colours.h>
 #include "WordSearched.cpp"
 
-class Client
-{
+class Client{
     private:
         int id;
-        float balance;
+        int balance;
         std::string objective;
         bool premium;
         std::mutex access;
     
     public:
-        Client(int id, std::string objective);
-        Client(int id, float balance, std::string objective);
+        Client(int id, std::string objective, int balance, bool premium);
         void toString();
         int getId();
         float getBalance();
         std::string getObjective();
         bool isPremium();
         void payCredit();
-        void restoreCredits();
-        void operator () ();
-
+        void restoreCredits();     
 };
-void Client::operator () (){
-    
-}
-/*Constructor cliente gratis*/
-Client::Client(int id, std::string objective)
-{   
+
+Client::Client(int id, std::string objective, int balance, bool premium){
     this->id=id;
-    this->balance=50;
+    // if(premium){
+    //     if(rand()%2==0){
+    //         this->balance=-1;
+    //     }else{
+    //         this->balance=balance;
+    //     }
+    // }else{
+    //     this->balance=50;
+    // }
+    this->balance=balance;
     this->objective = objective;
-    this->premium = false;
+    this->premium = premium;
+    toString();
 }
-/*Constructor cliente premium*/
-Client::Client(int id, float balance, std::string objective)
-{   
-    this->id=id;
-    this->balance = balance;
-    this->objective = objective;
-    this->premium = true;
-}
+
 int Client::getId(){
     return this->id;
 }
@@ -92,7 +87,7 @@ void Client::toString(){
         if(this->balance==-1){
             std::cout<<"[Cliente "<<id<<"] Saldo: UNLIMITED"<<std::endl;
         }else{
-            std::cout<<"[Cliente "<<id<<"] Saldo: "<<balance<<std::endl;
+            std::cout<<"[Cliente "<<id<<"] Palabra: "<<this->objective<<std::endl;
         } 
     }else{
         std::cout<<"[Cliente "<<id<<"]"<<std::endl;
