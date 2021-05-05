@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <cctype>
 #include <fstream>
 #include <regex>
@@ -11,9 +12,9 @@
 #include <functional>
 #include <definitions.h>
 #include <colours.h>
-#include <atomic>
 #include <cstdlib>
 #include <dirent.h>
+#include <condition_variable>
 #include "WordSearched.cpp"
 #include "Client.cpp"
 #include "PaySystem.cpp"
@@ -27,26 +28,29 @@ void find_word(int thread,std::vector<std::string> assignedLines, int begin, int
 std::map<int, std::vector<std::string>> shareLines(std::string file, int nLines);
 std::vector<std::string> splitLine(std::string line);
 std::string analizeWord(std::string word);
-void printResult(std::map<int,std::vector<WordSearched>> vWords);
+void printResult(std::map<int,std::vector<WordSearched>> vWords, Client c);
 void list_dir();
-
+void createLOG(int i);
 void generateClient(Client c);
+
 /*Valores estáticos*/
-#define NCLIENTS 1
+#define NCLIENTS 3
 #define NTHREADS 1
 #define BUFFER 4
 
+
 /*Variables globales*/
 
-QueueProtected requests;
+PaySystem ps;
 SemCounter sem(BUFFER);
-std::vector<Client> vClients;
 std::vector<std::string> vLibros;
+
 /*Vector para almacenar hilos buscadores*/
 std::vector<std::thread> vtSearches;
 
 /* El main se encargara de la creación de hilos y su finalización*/
 int main(int argc, char *argv[]){
+    std::thread pay(ps);
     list_dir();
     srand(time(NULL));
     for(int i = 0; i<NCLIENTS; i++){
@@ -56,6 +60,12 @@ int main(int argc, char *argv[]){
         vtSearches.push_back(std::thread(generateClient,vClients[i]));
     }
     std::for_each(vtSearches.begin(), vtSearches.end(), std::mem_fn(&std::thread::join));
+    pay.detach();
+}
+
+void createLOG(int i){
+    std::string name_fichero = "Client"+i;
+    std::ofstream(name_fichero, std::ios::out);
     
 }
 
@@ -64,7 +74,6 @@ void list_dir(){
     DIR * directorio;
     struct dirent *elemento;
     std::string elem;
-    std::string ss;
     if((directorio = opendir(dirPath.c_str()))){
         while((elemento = readdir(directorio))){
             elem = elemento->d_name;
@@ -95,8 +104,8 @@ void create_threads(std::string file, Client& c, std::mutex& access_balance){
     std::map<int,std::vector<WordSearched>> vWords;
     int begin, end;
     std::vector<std::thread> vThreads;
+
     nLines=number_of_lines(file);
-    std::cout<<"[CLiente "<<c.getId()<<"] "<<nLines<<"-"<<file<<std::endl;
     if(nLines<NTHREADS){
         std::cerr << ERROR("[ERROR]-- ")<<WARNING(UNDERLINE("More threads than lines") )  <<std::endl;
         exit(EXIT_FAILURE);
@@ -114,7 +123,7 @@ void create_threads(std::string file, Client& c, std::mutex& access_balance){
     }
 
     std::for_each(vThreads.begin(), vThreads.end(), std::mem_fn(&std::thread::join));
-    printResult(vWords);
+    printResult(vWords, c);
 }
 
 /* Devuelve el número de lineas de un archivo.*/
@@ -145,26 +154,26 @@ void find_word(int thread,std::vector<std::string> assignedLines, int begin, int
         for(std::size_t position = 0; position< line.size(); position++){
             
             if(!analizeWord(c.getObjective()).compare(analizeWord(line[position]))){
-                std::unique_lock<std::mutex> mBalance(access_balance);
-                if(c.isPremium()){
-                    if (c.getBalance()==-1){
-
-                    }else if(c.getBalance()==0){
-                        std::cout<<YELLOW<<"[Cliente "<<c.getId()<<"] se quedo sin saldo. Esperando a que PaySystem lo atienda..."<<std::endl;
-                        //ps.rechargeBalance();
-                    }else{
-                        std::cout<<"Creditos disponibles: "<<c.getBalance()<<std::endl;
-                        c.payCredit();
-                    }
-                }else{
-                    if(c.getBalance()==0){
+                access_balance.lock();
+                if (c.getBalance()!=-1){
+                    if(c.getBalance()==0 && !c.isPremium()){
                         break;
+                    }else if(c.getBalance()==0 && c.isPremium()){
+                        std::cout<<YELLOW<<"[Cliente "<<c.getId()<<"] se quedo sin saldo. Esperando a que PaySystem lo atienda..."<<std::endl;
+                        requests.add(Request(c.getId(), c.getBalance()));
+                        std::unique_lock<std::mutex> ul(sem_queue);
+                        cv_queue.wait(ul,[&c]{
+                            return c.getId()==id_flag;
+                        });
+                        c.restoreCredits();
+                        ul.unlock();
                     }else{
                         c.payCredit();
+                       // std::cout<<"[Cliente "<<c.getId()<<"] Creditos disponibles: "<<c.getBalance()<<std::endl;
                     }
                 }
-                mBalance.unlock();
-
+                access_balance.unlock();
+                
                 solution[1]=line[position];
                 if(position+1==line.size()){ // En el caso que se encuentre la palabra objetivo al final de la linea, el valor de la palabra siguiente sera nulo 
                     solution[2]="";
@@ -181,6 +190,7 @@ void find_word(int thread,std::vector<std::string> assignedLines, int begin, int
             std::cout<<"[Cliente "<<c.getId()<<"] se quedo sin saldo y no es premium. Saliendo del sistema..."<<std::endl;
             break;
         }
+        
             
     }
 }
@@ -224,10 +234,10 @@ std::map<int,std::vector<std::string>> shareLines(std::string file, int nLines){
     return result;   
 }
 
-void printResult(std::map<int,std::vector<WordSearched>> vWords){
+void printResult(std::map<int,std::vector<WordSearched>> vWords, Client c){
     for (std::size_t i = 0; i < vWords.size(); i++){
         for (std::size_t j = 0; j < vWords[i].size(); j++){
-            vWords[i][j].toString();
+            vWords[i][j].toString(c.getId());
         }   
     }
 }

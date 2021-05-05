@@ -2,6 +2,7 @@ DIROBJ := bin/
 DIREXE := exec/
 DIRHEA := include/
 DIRSRC := src/
+DIRLOG := log/
 
 CFLAGS := -c -Wall -ansi
 LDLIBS := -I$(DIRHEA) -pthread -std=c++17
@@ -9,8 +10,9 @@ CC := g++
 
 all : dirs main ssooiigle
 
+
 dirs:
-	mkdir -p $(DIROBJ) $(DIREXE
+	mkdir -p $(DIROBJ) $(DIREXE) $(DIRLOG)
 
 main:$(DIROBJ)main.o 
 	$(CC) -o $(DIREXE)$@ $^ $(LDLIBS)
@@ -38,4 +40,4 @@ test2:
 	./$(DIREXE)main
 
 clean :
-	rm -rf *~ core $(DIROBJ) $(DIREXE)
+	rm -rf *~ core $(DIROBJ) $(DIREXE) $(DIRLOG)

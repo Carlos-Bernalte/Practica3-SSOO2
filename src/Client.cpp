@@ -55,6 +55,7 @@ Client::Client(int id, std::string objective, int balance, int premium){
     this->init_balance=this->balance;
     this->objective = objective;
     this->premium = premium;
+
     toString();
 }
 

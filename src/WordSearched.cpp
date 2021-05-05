@@ -30,7 +30,7 @@ private:
 
 public:
     WordSearched(std::string objetivo, int nThread, int begin, int end, int line, std::string word_before, std::string word, std::string word_after);
-    void toString();
+    void toString(int client);
 };
 
 WordSearched::WordSearched(std::string objetivo,int nThread, int begin, int end, int line, std::string word_before, std::string word, std::string word_after)
@@ -45,8 +45,8 @@ WordSearched::WordSearched(std::string objetivo,int nThread, int begin, int end,
     this->word_after=word_after;
 }
 
-void WordSearched::toString(){
-    std::cout<< RESULT("[Hilo ")<< RED <<std::to_string(this->nThread) << RESULT(" inicio: ")<< RED<< std::to_string(this->begin)<<  RESULT(" – final: ")<< RED << std::to_string(this->end)<<  RESULT("] :: línea ")<< RED <<std::to_string(this->line)<<RESULT(" :: ")<< CIAN <<"... "+this->word_before<<" "<< ULINE <<this->word<< RESET<< CIAN<<" "<<this->word_after<<" ..."<<std::endl;
+void WordSearched::toString(int client){
+    std::cout<< YELLOW<<"[Client "<<RED<<client<<"]"<<MAGENTA<<"::"<<RESULT("[Hilo ")<< RED <<std::to_string(this->nThread) << RESULT(" inicio: ")<< RED<< std::to_string(this->begin)<<  RESULT(" – final: ")<< RED << std::to_string(this->end)<<  RESULT("] :: línea ")<< RED <<std::to_string(this->line)<<RESULT(" :: ")<< CIAN <<"... "+this->word_before<<" "<< ULINE <<this->word<< RESET<< CIAN<<" "<<this->word_after<<" ..."<<std::endl;
 }
 
 
