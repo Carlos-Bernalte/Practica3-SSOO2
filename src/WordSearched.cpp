@@ -46,9 +46,7 @@ WordSearched::WordSearched(std::string objetivo,int nThread, int begin, int end,
 }
 
 void WordSearched::toString(int client){
-    std::cout<< YELLOW<<"[Client "<<RED<<client<<"]"<<MAGENTA<<"::"<<RESULT("[Hilo ")<< RED <<std::to_string(this->nThread) << RESULT(" inicio: ")<< RED<< std::to_string(this->begin)<<  RESULT(" – final: ")<< RED << std::to_string(this->end)<<  RESULT("] :: línea ")<< RED <<std::to_string(this->line)<<RESULT(" :: ")<< CIAN <<"... "+this->word_before<<" "<< ULINE <<this->word<< RESET<< CIAN<<" "<<this->word_after<<" ..."<<std::endl;
+    std::cout<< YELLOW<<"[Client "<<RED<<client<<YELLOW<<"]"<<MAGENTA<<"::"<<RESULT("[Hilo ")<< RED <<std::to_string(this->nThread) << RESULT(" inicio: ")<< RED<< std::to_string(this->begin)<<  RESULT(" – final: ")<< RED << std::to_string(this->end)<<  RESULT("] :: línea ")<< RED <<std::to_string(this->line)<<RESULT(" :: ")<< CIAN <<"... "+this->word_before<<" "<< ULINE <<this->word<< RESET<< CIAN<<" "<<this->word_after<<" ..."<<std::endl;
 }
-
-
 
 #endif

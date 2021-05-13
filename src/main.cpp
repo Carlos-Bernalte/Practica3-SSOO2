@@ -15,11 +15,19 @@
 #include <cstdlib>
 #include <dirent.h>
 #include <condition_variable>
+#include <future>
+#include <signal.h>
+#include <exception>
 #include "WordSearched.cpp"
 #include "Client.cpp"
 #include "PaySystem.cpp"
 #include "QueueProtected.cpp"
 #include "SemCounter2.cpp"
+
+
+/*Manejador de señal*/
+void signal_handler(int signal);
+void install_handler();
 
 /*Funciones definidas*/
 int number_of_lines(std::string file);
@@ -44,28 +52,55 @@ void generateClient(Client c);
 PaySystem ps;
 SemCounter sem(BUFFER);
 std::vector<std::string> vLibros;
-
 /*Vector para almacenar hilos buscadores*/
 std::vector<std::thread> vtSearches;
 
+/***************************************************************/
+/***************************MAIN********************************/
+/***************************************************************/
 /* El main se encargara de la creación de hilos y su finalización*/
 int main(int argc, char *argv[]){
+    /*Lanzamos manejadores de señal*/
+    install_handler();
     std::thread pay(ps);
     list_dir();
     srand(time(NULL));
     for(int i = 0; i<NCLIENTS; i++){
         vClients.push_back(Client(i,WORDS[(rand()%WORDS.size())],rand()%5+1,(rand()%2)));
+        createLOG(i);
     }
     for(std::size_t i=0; i<vClients.size(); i++){
         vtSearches.push_back(std::thread(generateClient,vClients[i]));
     }
     std::for_each(vtSearches.begin(), vtSearches.end(), std::mem_fn(&std::thread::join));
     pay.detach();
+    
+}
+
+/***************************************************************/
+/*************************METHODS*******************************/
+/***************************************************************/
+
+void install_handler(){
+    if(signal(SIGINT, signal_handler)== SIG_ERR){
+        std::cout<<"Error instaling the signal handler"<<std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+}
+
+void signal_handler(int signal){
+    std::cout<<"Finalize program by the user..."<<std::endl;
+    std::exit(EXIT_FAILURE);
 }
 
 void createLOG(int i){
-    std::string name_fichero = "Client"+i;
-    std::ofstream(name_fichero, std::ios::out);
+    std::string name_fichero = "./log/Client_"+std::to_string(i)+".txt";
+    try{
+        std::ofstream(name_fichero, std::ios::out);
+    }catch(const std::exception& e){
+        std::cout<<e.what()<<std::endl;
+    }
+    
     
 }
 
@@ -104,7 +139,6 @@ void create_threads(std::string file, Client& c, std::mutex& access_balance){
     std::map<int,std::vector<WordSearched>> vWords;
     int begin, end;
     std::vector<std::thread> vThreads;
-
     nLines=number_of_lines(file);
     if(nLines<NTHREADS){
         std::cerr << ERROR("[ERROR]-- ")<<WARNING(UNDERLINE("More threads than lines") )  <<std::endl;
@@ -160,6 +194,18 @@ void find_word(int thread,std::vector<std::string> assignedLines, int begin, int
                         break;
                     }else if(c.getBalance()==0 && c.isPremium()){
                         std::cout<<YELLOW<<"[Cliente "<<c.getId()<<"] se quedo sin saldo. Esperando a que PaySystem lo atienda..."<<std::endl;
+                        Request r(c.getId(), c.getInitialBalance());
+                        std::cout<<RED<<"[MAIN]"<<RESET<<std::endl;
+                        r.toString();
+                        requests.add(std::move(r));
+
+                        try{
+                            c.restoreCredits(r.recharge.get()); 
+                        }catch(std::exception& e) {
+                            std::cout <<RED<< e.what() << RESET<<std::endl;
+                        }
+                        
+                        /*
                         requests.add(Request(c.getId(), c.getBalance()));
                         std::unique_lock<std::mutex> ul(sem_queue);
                         cv_queue.wait(ul,[&c]{
@@ -167,6 +213,8 @@ void find_word(int thread,std::vector<std::string> assignedLines, int begin, int
                         });
                         c.restoreCredits();
                         ul.unlock();
+                        */
+
                     }else{
                         c.payCredit();
                        // std::cout<<"[Cliente "<<c.getId()<<"] Creditos disponibles: "<<c.getBalance()<<std::endl;

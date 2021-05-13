@@ -30,19 +30,14 @@ public:
     void operator () ();
 };
 void PaySystem::operator () (){
-    int id;
     while(1){
         if(!requests.checkEmpty()){
-            id = requests.remove().getID();
-            for(std::size_t i=0; i< vClients.size(); i++){
-                if(id==vClients[i].getId()){
-                    std::cout<<"[PaySystem] Cliente: "<<id<<" atendido"<<std::endl;
-                    id_flag=vClients[i].getId();
-                    cv_queue.notify_all();
-                    break;
-                }
-            }
-            
+            Request r = Request(requests.remove());
+            qRequests.pop();
+            std::cout<<MAGENTA<<"[PAYSYSTEM] Atendiendo la petición de recarga del Cliente "<<RESET<<r.getID()<<std::endl;
+            std::cout<<RED<<"[PAYSYSTEM]"<<RESET<<std::endl;
+            r.toString();
+            r.petition.set_value(r.getCredit());
         }
     }
 }
