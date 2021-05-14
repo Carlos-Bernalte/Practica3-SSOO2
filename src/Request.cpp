@@ -1,3 +1,17 @@
+/*********************************************
+*   Project: Práctica 3 de Sistemas Operativos II 
+*
+*   Program name: Request.cpp
+*
+*   Author: Carlos Bernalte García-Junco & Paulino De La Fuente Lizcano
+*
+*   Date created: 24-03-2021
+*
+*   Porpuse: Clases para almacenar información relacionada con peticiones solicitadas.
+*
+*   Revision History: Se puede encontrar en el repositorio de GitHub.
+|*********************************************/
+
 #ifndef REQUEST
 #define REQUEST
 

@@ -1,3 +1,16 @@
+/*********************************************
+*   Project: Práctica 3 de Sistemas Operativos II 
+*
+*   Program name: SemCounter.cpp
+*
+*   Author: Javier Alonso Albusac Jiménez :)
+*
+*   Date created: 24-03-2021
+*
+*   Porpuse: Clase para controlar el número de clientes que pueden acceder a la vez al buscador.
+*
+|*********************************************/
+
 #ifndef SEMCOUNTER
 #define SEMCOUNTER
 

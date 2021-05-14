@@ -21,6 +21,8 @@ $(DIROBJ)%.o: $(DIRSRC)%.cpp
 	$(CC) $(CFLAGS) $^ -o $@ $(LDLIBS)
 
 test:
+	rm -rf $(DIRLOG)
+	mkdir -p $(DIRLOG)
 	./$(DIREXE)main
 
 clean :

@@ -1,13 +1,14 @@
+
 /*********************************************
-*   Project: Práctica 2 de Sistemas Operativos II 
+*   Project: Práctica 3 de Sistemas Operativos II 
 *
 *   Program name: WordSearched.c
 *
-*   Author: Carlos Bernalte García-Junco
+*   Author: Carlos Bernalte García-Junco & Paulino De La Fuente Lizcano
 *
-*   Date created: 19-03-2021
+*   Date created: 24-03-2021
 *
-*   Porpuse: Clases para almacenar información relacionada con palabras buscadas.
+*   Porpuse: Almacenar la informacion obtenida por un hilo al detectar una palabra 
 *
 *   Revision History: Se puede encontrar en el repositorio de GitHub.
 |*********************************************/
@@ -33,7 +34,7 @@ private:
 public:
     WordSearched(std::string objetivo, int nThread, int begin, int end, int line, std::string word_before, std::string word, std::string word_after);
     void toString(int client);
-    void write_log(int id);
+    std::string returnString();
 };
 
 
@@ -51,16 +52,11 @@ WordSearched::WordSearched(std::string objetivo,int nThread, int begin, int end,
 }
 
 void WordSearched::toString(int client){
-    std::cout<< YELLOW<<"[Client "<<RED<<client<<YELLOW<<"]"<<MAGENTA<<"::"<<RESULT("[Hilo ")<< RED <<std::to_string(this->nThread) << RESULT(" inicio: ")<< RED<< std::to_string(this->begin)<<  RESULT(" – final: ")<< RED << std::to_string(this->end)<<  RESULT("] :: línea ")<< RED <<std::to_string(this->line)<<RESULT(" :: ")<< CIAN <<"... "+this->word_before<<" "<< ULINE <<this->word<< RESET<< CIAN<<" "<<this->word_after<<" ..."<<std::endl;
+    std::cout<< YELLOW<<"[Cliente "<<RED<<client<<YELLOW<<"]"<<MAGENTA<<"::"<<RESULT("[Hilo ")<< RED <<std::to_string(this->nThread) << RESULT(" inicio: ")<< RED<< std::to_string(this->begin)<<  RESULT(" – final: ")<< RED << std::to_string(this->end)<<  RESULT("] :: línea ")<< RED <<std::to_string(this->line)<<RESULT(" :: ")<< CIAN <<"... "+this->word_before<<" "<< ULINE <<this->word<< RESET<< CIAN<<" "<<this->word_after<<" ..."<<std::endl;
 }
 
-void WordSearched::write_log(int id){
-    std::string PATH_LOG = "./log/Client_"+std::to_string(id)+".txt";
-    std::ofstream fd;
-    std::string aux = "[PALABRA: "+this->word+"] "+":: [Hilo "+std::to_string(this->nThread)+" inicio "+std::to_string(this->begin)+" – final: "+std::to_string(this->end)+"] :: línea "+std::to_string(this->line)+" :: ..."+this->word_before+" "+this->word+" "+this->word_after+" ... \n";
-    fd.open(PATH_LOG.c_str(),std::fstream::app);
-    fd << aux;
-    fd.close();
+std::string WordSearched::returnString(){
+  return "[Hilo "+std::to_string(this->nThread)+" inicio: "+ std::to_string(this->begin)+" – final: "+std::to_string(this->end)+"] :: línea "+std::to_string(this->line)+":: ... "+this->word_before+" "+this->word+" "+this->word_after+" ...\n";
 }
 
 #endif
