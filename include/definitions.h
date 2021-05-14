@@ -19,10 +19,19 @@ std::condition_variable cv_queue;
 /*Semaforo para controlar la cola de peticiones de pago*/
 std::mutex sem_queue;
 
-
 /*COLA QUE DA PROBLEMAS*/
 QueueProtected requests;
 std::vector<Client> vClients;
+
+void write_log(Client c){
+    std::string PATH_LOG = "./log/Client_"+std::to_string(c.getId())+".txt";
+    std::ofstream fd;
+    std::string aux = "*****[CLIENTE "+std::to_string(c.getId())+"]::"+"[TIEMPO: "+std::to_string(c.time)+"segundos]*****\n";
+    fd.open(PATH_LOG.c_str(),std::fstream::app);
+    fd << aux;
+    fd.close();
+
+}
 
 std::vector<std::string> WORDS =
 {

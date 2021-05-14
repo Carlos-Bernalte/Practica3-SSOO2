@@ -41,7 +41,7 @@ void printResult(std::map<int,std::vector<WordSearched>> vWords, Client c,std::m
 void list_dir();
 void createLOG(int i);
 void generateClient(Client c);
-
+void write_log(Client c);
 
 /*Valores estáticos*/
 #define NCLIENTS 5
@@ -63,8 +63,9 @@ std::vector<std::thread> vtSearches;
 /* El main se encargara de la creación de hilos y su finalización*/
 int main(int argc, char *argv[]){
     install_handler();
-    std::thread pay(ps);
     list_dir();
+    std::thread pay(ps);
+    
     srand(time(NULL));
     for(int i = 0; i<NCLIENTS; i++){
         vClients.push_back(Client(i,WORDS[(rand()%WORDS.size())],rand()%5+1,(rand()%2)));
@@ -106,10 +107,11 @@ void createLOG(int i){
         std::cout<<e.what()<<std::endl;
     }
     
+    
 }
 
 void list_dir(){
-    std::string dirPath="./librosSinLeer";
+    std::string dirPath="./libros";
     DIR * directorio;
     struct dirent *elemento;
     std::string elem;
@@ -131,18 +133,21 @@ void generateClient(Client c){
     std::mutex access_balance;
     std::mutex access_log;
 
-    double t0, t1;
+    float t0, t1;
     t0=std::clock();
     for (std::size_t i = 0; i < vLibros.size(); i++){
+        c.writeLOG();
         vSearch.push_back(std::thread(create_threads, vLibros[i], std::ref(c), std::ref(access_balance), std::ref(access_log)));
     }
     
     std::for_each(vSearch.begin(), vSearch.end(), std::mem_fn(&std::thread::join));
     t1=std::clock();
     c.time=(t1-t0/CLOCKS_PER_SEC);
+    write_log(c);
 }
 
 
+/*Lanzamos en base al numero de lineas, distintos hilos que se encargaran de buscar en los libros en zonas distintas*/
 void create_threads(std::string file, Client& c, std::mutex& access_balance, std::mutex& access_log){
     int nLines;
     int sizeForThreads;
@@ -176,7 +181,7 @@ void create_threads(std::string file, Client& c, std::mutex& access_balance, std
 /* Devuelve el número de lineas de un archivo.*/
 int number_of_lines(std::string file){
     int numLines = 0;
-    std::string dir = "./librosSinLeer/"+file;
+    std::string dir = "./libros/"+file;
     std::ifstream File(dir); 
 
     while (File.good()) 
@@ -205,10 +210,10 @@ void find_word(int thread,std::vector<std::string> assignedLines, int begin, int
                 if (c.getBalance()!=-1){
                     if(c.getBalance()==0 && !c.isPremium()){
                         break;
+
                     }else if(c.getBalance()==0 && c.isPremium()){
                         std::cout<<YELLOW<<"[Cliente "<<RED<<c.getId()<<YELLOW<<"] "<<MAGENTA<<"se quedo sin saldo. Esperando a que PaySystem lo atienda..."<<RESET<<std::endl;
                         Request r(c.getId(), c.getInitialBalance());
-                        
                         requests.add(std::move(r));
                         
                         std::unique_lock<std::mutex> ul(sem_queue);
@@ -269,7 +274,7 @@ std::vector<std::string> splitLine(std::string line){
 
 /* Asignara a cada hilo el número correspondiente de linea a leer*/
 std::map<int,std::vector<std::string>> shareLines(std::string file, int nLines){
-    std::ifstream File("./librosSinLeer/"+file);
+    std::ifstream File("./libros/"+file);
     std::string line;
     std::map<int, std::vector<std::string>> result;
     int sizeOfThreads = nLines/NTHREADS;
@@ -290,7 +295,7 @@ void printResult(std::map<int,std::vector<WordSearched>> vWords, Client c, std::
     
     for (std::size_t i = 0; i < vWords.size(); i++){
         for (std::size_t j = 0; j < vWords[i].size(); j++){
-            vWords[i][j].toString(c.getId());
+            //vWords[i][j].toString(c.getId());
             access_log.lock();
             vWords[i][j].write_log(c.getId());
             access_log.unlock();

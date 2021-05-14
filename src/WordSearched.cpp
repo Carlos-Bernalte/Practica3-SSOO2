@@ -57,7 +57,7 @@ void WordSearched::toString(int client){
 void WordSearched::write_log(int id){
     std::string PATH_LOG = "./log/Client_"+std::to_string(id)+".txt";
     std::ofstream fd;
-    std::string aux = "[Client "+std::to_string(id)+"]::"+"[Hilo "+std::to_string(this->nThread)+" inicio "+std::to_string(this->begin)+" – final: "+std::to_string(this->end)+"] :: línea "+std::to_string(this->line)+" :: ..."+this->word_before+" "+this->word+" "+this->word_after+" ... \n";
+    std::string aux = "[PALABRA: "+this->word+"] "+":: [Hilo "+std::to_string(this->nThread)+" inicio "+std::to_string(this->begin)+" – final: "+std::to_string(this->end)+"] :: línea "+std::to_string(this->line)+" :: ..."+this->word_before+" "+this->word+" "+this->word_after+" ... \n";
     fd.open(PATH_LOG.c_str(),std::fstream::app);
     fd << aux;
     fd.close();

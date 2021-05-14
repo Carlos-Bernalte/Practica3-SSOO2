@@ -32,7 +32,7 @@ class Client{
         
     
     public:
-        double time;
+        float time;
         Client(int id, std::string objective, int balance, int premium);
         ~Client();
         void toString();
@@ -42,12 +42,10 @@ class Client{
         std::string getObjective();
         bool isPremium();
         void payCredit();
-        void restoreCredits(int credits);    
+        void restoreCredits(int credits);
+        void writeLOG();    
 };
-
-Client::~Client(){
-
-}
+Client::~Client(){}
 Client::Client(int id, std::string objective, int balance, int premium){
     this->id=id;
     if(premium){
@@ -63,6 +61,8 @@ Client::Client(int id, std::string objective, int balance, int premium){
     this->objective = objective;
     this->premium = premium;
     toString();
+    writeLOG();
+    
 }
 
 int Client::getId(){
@@ -81,6 +81,7 @@ bool Client::isPremium(){
 void Client::payCredit(){
     this->balance--;
 }
+
 void Client::restoreCredits(int credits){
     this->balance=credits;
 }
@@ -89,6 +90,15 @@ std::string Client::getObjective(){
     return this->objective;
 }
 
+void Client::writeLOG(){
+    std::string PATH_LOG = "./log/Client_"+std::to_string(this->id)+".txt";
+    std::ofstream fd;
+    std::string aux = "*****[CLIENTE "+std::to_string(this->id)+"]::"+"[PALABRA: "+this->objective+"]"+"[VIP "+std::to_string(this->premium)+"] [CREDITO_INICIAL: "+std::to_string(this->init_balance)+"]*****\n";
+    fd.open(PATH_LOG.c_str(),std::fstream::app);
+    fd << aux;
+    fd.close();
+
+}
 void Client::toString(){
     if(this->premium){
         if(this->balance==-1){
