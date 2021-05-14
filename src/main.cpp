@@ -42,7 +42,7 @@ void createLOG(int i);
 void generateClient(Client c);
 
 /*Valores estáticos*/
-#define NCLIENTS 3
+#define NCLIENTS 5
 #define NTHREADS 1
 #define BUFFER 4
 
@@ -73,7 +73,9 @@ int main(int argc, char *argv[]){
         vtSearches.push_back(std::thread(generateClient,vClients[i]));
     }
     std::for_each(vtSearches.begin(), vtSearches.end(), std::mem_fn(&std::thread::join));
-    pay.detach();
+    end_program=true;
+    pay.join();
+    vClients.clear();
     
 }
 
@@ -89,7 +91,7 @@ void install_handler(){
 }
 
 void signal_handler(int signal){
-    std::cout<<"Finalize program by the user..."<<std::endl;
+    std::cout<<std::endl<<YELLOW<<"[SIGNAL HANDLER] Finalize program by the user..."<<RESET<<std::endl;
     std::exit(EXIT_FAILURE);
 }
 
@@ -128,8 +130,10 @@ void generateClient(Client c){
     for (std::size_t i = 0; i < vLibros.size(); i++){
         vSearch.push_back(std::thread(create_threads, vLibros[i], std::ref(c), std::ref(access)));
     }
+
     std::for_each(vSearch.begin(), vSearch.end(), std::mem_fn(&std::thread::join));
 }
+
 
 void create_threads(std::string file, Client& c, std::mutex& access_balance){
     int nLines;
@@ -159,6 +163,7 @@ void create_threads(std::string file, Client& c, std::mutex& access_balance){
     std::for_each(vThreads.begin(), vThreads.end(), std::mem_fn(&std::thread::join));
     printResult(vWords, c);
 }
+
 
 /* Devuelve el número de lineas de un archivo.*/
 int number_of_lines(std::string file){
@@ -193,28 +198,20 @@ void find_word(int thread,std::vector<std::string> assignedLines, int begin, int
                     if(c.getBalance()==0 && !c.isPremium()){
                         break;
                     }else if(c.getBalance()==0 && c.isPremium()){
-                        std::cout<<YELLOW<<"[Cliente "<<c.getId()<<"] se quedo sin saldo. Esperando a que PaySystem lo atienda..."<<std::endl;
+                        std::cout<<YELLOW<<"[Cliente "<<RED<<c.getId()<<YELLOW<<"] "<<MAGENTA<<"se quedo sin saldo. Esperando a que PaySystem lo atienda..."<<RESET<<std::endl;
                         Request r(c.getId(), c.getInitialBalance());
-                        std::cout<<RED<<"[MAIN]"<<RESET<<std::endl;
-                        r.toString();
-                        requests.add(std::move(r));
-
-                        try{
-                            c.restoreCredits(r.recharge.get()); 
-                        }catch(std::exception& e) {
-                            std::cout <<RED<< e.what() << RESET<<std::endl;
-                        }
                         
-                        /*
-                        requests.add(Request(c.getId(), c.getBalance()));
+                        requests.add(std::move(r));
+                        
                         std::unique_lock<std::mutex> ul(sem_queue);
                         cv_queue.wait(ul,[&c]{
                             return c.getId()==id_flag;
                         });
-                        c.restoreCredits();
-                        ul.unlock();
-                        */
 
+                        c.restoreCredits(credits);
+                        c.toString();
+                        ul.unlock();
+                      
                     }else{
                         c.payCredit();
                        // std::cout<<"[Cliente "<<c.getId()<<"] Creditos disponibles: "<<c.getBalance()<<std::endl;
@@ -235,7 +232,7 @@ void find_word(int thread,std::vector<std::string> assignedLines, int begin, int
             solution[0]=line[position];//Las palabras ya leidas paran a la varible palabra anterior.
         }
         if(c.getBalance()==0 && !c.isPremium()){
-            std::cout<<"[Cliente "<<c.getId()<<"] se quedo sin saldo y no es premium. Saliendo del sistema..."<<std::endl;
+            std::cout<<YELLOW<<"[Cliente "<<RED<<c.getId()<<YELLOW<<"] "<<MAGENTA<<"se quedo sin saldo y no es premium. Saliendo del sistema..."<<RESET<<std::endl;
             break;
         }
         

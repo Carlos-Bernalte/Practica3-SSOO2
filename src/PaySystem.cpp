@@ -17,6 +17,8 @@
 
 #include <iostream>
 #include <condition_variable>
+#include <queue>
+#include <utility>
 #include <definitions.h>
 #include "Request.cpp"
 #include "QueueProtected.cpp"
@@ -32,14 +34,19 @@ public:
 void PaySystem::operator () (){
     while(1){
         if(!requests.checkEmpty()){
-            Request r = Request(requests.remove());
-            qRequests.pop();
-            std::cout<<MAGENTA<<"[PAYSYSTEM] Atendiendo la petición de recarga del Cliente "<<RESET<<r.getID()<<std::endl;
-            std::cout<<RED<<"[PAYSYSTEM]"<<RESET<<std::endl;
-            r.toString();
-            r.petition.set_value(r.getCredit());
+            std::this_thread::sleep_for (std::chrono::seconds(1));
+            Request r = std::move(requests.remove());
+            std::cout<<YELLOW<<"[PAYSYSTEM]"<<MAGENTA<<" Atendiendo la petición de recarga del Cliente "<<RED<<r.getID()<<RESET<<std::endl;
+            id_flag=r.getID();
+            credits=r.getCredit();
+            cv_queue.notify_all();
+        }else if(end_program){
+            break;
         }
     }
+    std::cout<<YELLOW<<"[PAYSYSTEM]"<<MAGENTA<<" Shutdown..."<<RESET<<std::endl;
 }
+    
+
 
 #endif

@@ -95,7 +95,7 @@ void Client::writeLOG(){
     if(!file){
         std::cout<<"File not created!"<<std::endl;
     }else{
-        std::cout<<"Escribiendo"<<std::endl;
+        //std::cout<<"Escribiendo"<<std::endl;
         if(this->premium){
             if(this->balance==-1){
             
@@ -116,15 +116,12 @@ void Client::writeLOG(){
 void Client::toString(){
     if(this->premium){
         if(this->balance==-1){
-            
-            std::cout<<BLUE<<"[Cliente "<<this->id<<"]"<<"-- Cuenta: Premium -- Palabra: "<<this->objective<<" -- Saldo: UNLIMITED"<<std::endl;
+            std::cout<<YELLOW<<"[Cliente "<<RED<<this->id<<YELLOW<<"]"<<MAGENTA<<":: Cuenta:"<<YELLOW<<" Premium"<<MAGENTA<<" :: Palabra: "<<CIAN<<this->objective<<MAGENTA<<" :: Saldo: "<<RED<<"UNLIMITED"<<RESET<<std::endl;
         }else{
-            
-            std::cout<<BLUE<<"[Cliente "<<this->id<<"] -- Cuenta: Premium -- Palabra: "<<this->objective<<" -- Saldo: "<<this->balance<<std::endl;
+            std::cout<<YELLOW<<"[Cliente "<<RED<<this->id<<YELLOW<<"]"<<MAGENTA<<":: Cuenta:"<<YELLOW<<" Premium"<<MAGENTA<<" :: Palabra: "<<CIAN<<this->objective<<MAGENTA<<" :: Saldo: "<<RED<<this->balance<<RESET<<std::endl;
         } 
     }else{
-        
-        std::cout<<BLUE<<"[Cliente "<<this->id<<"] Cuenta: Gratis -- Palabra: "<<this->objective<<" -- Saldo: "<<this->balance<<std::endl;
+        std::cout<<YELLOW<<"[Cliente "<<RED<<this->id<<YELLOW<<"]"<<MAGENTA<<":: Cuenta:"<<GREEN<<" Gratis"<<MAGENTA<<" :: Palabra: "<<CIAN<<this->objective<<MAGENTA<<" :: Saldo: "<<RED<<this->balance<<RESET<<std::endl;
     }
 }
 
