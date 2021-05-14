@@ -14,7 +14,9 @@
 #ifndef WORD
 #define WORD
 #include <iostream>
+#include "Client.cpp"
 #include <colours.h>
+
 
 class WordSearched
 {
@@ -31,7 +33,10 @@ private:
 public:
     WordSearched(std::string objetivo, int nThread, int begin, int end, int line, std::string word_before, std::string word, std::string word_after);
     void toString(int client);
+    void write_log(int id);
 };
+
+
 
 WordSearched::WordSearched(std::string objetivo,int nThread, int begin, int end, int line, std::string word_before, std::string word, std::string word_after)
 {
@@ -47,6 +52,15 @@ WordSearched::WordSearched(std::string objetivo,int nThread, int begin, int end,
 
 void WordSearched::toString(int client){
     std::cout<< YELLOW<<"[Client "<<RED<<client<<YELLOW<<"]"<<MAGENTA<<"::"<<RESULT("[Hilo ")<< RED <<std::to_string(this->nThread) << RESULT(" inicio: ")<< RED<< std::to_string(this->begin)<<  RESULT(" – final: ")<< RED << std::to_string(this->end)<<  RESULT("] :: línea ")<< RED <<std::to_string(this->line)<<RESULT(" :: ")<< CIAN <<"... "+this->word_before<<" "<< ULINE <<this->word<< RESET<< CIAN<<" "<<this->word_after<<" ..."<<std::endl;
+}
+
+void WordSearched::write_log(int id){
+    std::string PATH_LOG = "./log/Client_"+std::to_string(id)+".txt";
+    std::ofstream fd;
+    std::string aux = "[Client "+std::to_string(id)+"]::"+"[Hilo "+std::to_string(this->nThread)+" inicio "+std::to_string(this->begin)+" – final: "+std::to_string(this->end)+"] :: línea "+std::to_string(this->line)+" :: ..."+this->word_before+" "+this->word+" "+this->word_after+" ... \n";
+    fd.open(PATH_LOG.c_str(),std::fstream::app);
+    fd << aux;
+    fd.close();
 }
 
 #endif

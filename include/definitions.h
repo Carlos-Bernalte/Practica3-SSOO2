@@ -19,6 +19,7 @@ std::condition_variable cv_queue;
 /*Semaforo para controlar la cola de peticiones de pago*/
 std::mutex sem_queue;
 
+
 /*COLA QUE DA PROBLEMAS*/
 QueueProtected requests;
 std::vector<Client> vClients;
@@ -27,7 +28,8 @@ std::vector<std::string> WORDS =
 {
     "lineas",
     "la",
-    "palabra"
+    "palabra",
+    "ley"
 };
 
 #endif

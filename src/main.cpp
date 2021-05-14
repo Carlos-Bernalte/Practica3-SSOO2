@@ -16,6 +16,7 @@
 #include <dirent.h>
 #include <condition_variable>
 #include <future>
+#include <chrono>
 #include <signal.h>
 #include <exception>
 #include "WordSearched.cpp"
@@ -31,15 +32,16 @@ void install_handler();
 
 /*Funciones definidas*/
 int number_of_lines(std::string file);
-void create_threads(std::string file, Client& c, std::mutex& access_balance);
+void create_threads(std::string file, Client& c, std::mutex& access_balance,std::mutex& access_log);
 void find_word(int thread,std::vector<std::string> assignedLines, int begin, int end, Client& c, std::mutex& access_balance, std::mutex& access_result,std::map<int,std::vector<WordSearched>>& vWords);
 std::map<int, std::vector<std::string>> shareLines(std::string file, int nLines);
 std::vector<std::string> splitLine(std::string line);
 std::string analizeWord(std::string word);
-void printResult(std::map<int,std::vector<WordSearched>> vWords, Client c);
+void printResult(std::map<int,std::vector<WordSearched>> vWords, Client c,std::mutex& access_log);
 void list_dir();
 void createLOG(int i);
 void generateClient(Client c);
+
 
 /*Valores estáticos*/
 #define NCLIENTS 5
@@ -60,7 +62,6 @@ std::vector<std::thread> vtSearches;
 /***************************************************************/
 /* El main se encargara de la creación de hilos y su finalización*/
 int main(int argc, char *argv[]){
-    /*Lanzamos manejadores de señal*/
     install_handler();
     std::thread pay(ps);
     list_dir();
@@ -70,6 +71,7 @@ int main(int argc, char *argv[]){
         createLOG(i);
     }
     for(std::size_t i=0; i<vClients.size(); i++){
+
         vtSearches.push_back(std::thread(generateClient,vClients[i]));
     }
     std::for_each(vtSearches.begin(), vtSearches.end(), std::mem_fn(&std::thread::join));
@@ -90,6 +92,7 @@ void install_handler(){
     }
 }
 
+
 void signal_handler(int signal){
     std::cout<<std::endl<<YELLOW<<"[SIGNAL HANDLER] Finalize program by the user..."<<RESET<<std::endl;
     std::exit(EXIT_FAILURE);
@@ -103,11 +106,10 @@ void createLOG(int i){
         std::cout<<e.what()<<std::endl;
     }
     
-    
 }
 
 void list_dir(){
-    std::string dirPath="./libros";
+    std::string dirPath="./librosSinLeer";
     DIR * directorio;
     struct dirent *elemento;
     std::string elem;
@@ -126,16 +128,22 @@ void list_dir(){
 
 void generateClient(Client c){
     std::vector<std::thread> vSearch;
-    std::mutex access;
-    for (std::size_t i = 0; i < vLibros.size(); i++){
-        vSearch.push_back(std::thread(create_threads, vLibros[i], std::ref(c), std::ref(access)));
-    }
+    std::mutex access_balance;
+    std::mutex access_log;
 
+    double t0, t1;
+    t0=std::clock();
+    for (std::size_t i = 0; i < vLibros.size(); i++){
+        vSearch.push_back(std::thread(create_threads, vLibros[i], std::ref(c), std::ref(access_balance), std::ref(access_log)));
+    }
+    
     std::for_each(vSearch.begin(), vSearch.end(), std::mem_fn(&std::thread::join));
+    t1=std::clock();
+    c.time=(t1-t0/CLOCKS_PER_SEC);
 }
 
 
-void create_threads(std::string file, Client& c, std::mutex& access_balance){
+void create_threads(std::string file, Client& c, std::mutex& access_balance, std::mutex& access_log){
     int nLines;
     int sizeForThreads;
     std::mutex access_result;
@@ -161,14 +169,14 @@ void create_threads(std::string file, Client& c, std::mutex& access_balance){
     }
 
     std::for_each(vThreads.begin(), vThreads.end(), std::mem_fn(&std::thread::join));
-    printResult(vWords, c);
+    printResult(vWords, c,std::ref(access_log));
 }
 
 
 /* Devuelve el número de lineas de un archivo.*/
 int number_of_lines(std::string file){
     int numLines = 0;
-    std::string dir = "./libros/"+file;
+    std::string dir = "./librosSinLeer/"+file;
     std::ifstream File(dir); 
 
     while (File.good()) 
@@ -211,7 +219,7 @@ void find_word(int thread,std::vector<std::string> assignedLines, int begin, int
                         c.restoreCredits(credits);
                         c.toString();
                         ul.unlock();
-                      
+                    
                     }else{
                         c.payCredit();
                        // std::cout<<"[Cliente "<<c.getId()<<"] Creditos disponibles: "<<c.getBalance()<<std::endl;
@@ -235,10 +243,9 @@ void find_word(int thread,std::vector<std::string> assignedLines, int begin, int
             std::cout<<YELLOW<<"[Cliente "<<RED<<c.getId()<<YELLOW<<"] "<<MAGENTA<<"se quedo sin saldo y no es premium. Saliendo del sistema..."<<RESET<<std::endl;
             break;
         }
-        
-            
     }
 }
+
 /* Se encarga de formatear una palabra para compararla con la con la palabra objetivo*/
 std::string analizeWord(std::string word){
     std::string result;
@@ -262,7 +269,7 @@ std::vector<std::string> splitLine(std::string line){
 
 /* Asignara a cada hilo el número correspondiente de linea a leer*/
 std::map<int,std::vector<std::string>> shareLines(std::string file, int nLines){
-    std::ifstream File("./libros/"+file);
+    std::ifstream File("./librosSinLeer/"+file);
     std::string line;
     std::map<int, std::vector<std::string>> result;
     int sizeOfThreads = nLines/NTHREADS;
@@ -279,10 +286,14 @@ std::map<int,std::vector<std::string>> shareLines(std::string file, int nLines){
     return result;   
 }
 
-void printResult(std::map<int,std::vector<WordSearched>> vWords, Client c){
+void printResult(std::map<int,std::vector<WordSearched>> vWords, Client c, std::mutex& access_log){
+    
     for (std::size_t i = 0; i < vWords.size(); i++){
         for (std::size_t j = 0; j < vWords[i].size(); j++){
             vWords[i][j].toString(c.getId());
+            access_log.lock();
+            vWords[i][j].write_log(c.getId());
+            access_log.unlock();
         }   
     }
 }
